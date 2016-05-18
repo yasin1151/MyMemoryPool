@@ -35,10 +35,15 @@ class MyMemoryPool
 public:
 	/**@param init beginSize chunk
 	*/
-	MyMemoryPool(int beginSize = 10)
+	MyMemoryPool(int beginSize = 10, int chunkSize = sizeof(T))
+		:m_chunkSize(chunkSize)
 	{
-		m_chunkSize = sizeof(T);
 		addMem(beginSize);
+	}
+
+	~MyMemoryPool()
+	{
+		clear();
 	}
 
 	/*@brief : to allocation a memory chunk 
@@ -53,6 +58,8 @@ public:
 private:
 
 	void addMem(int size = 0);
+
+	void clear();
 
 private:
 	std::mutex		  m_mutex;				//ª•≥‚¡ø
@@ -111,6 +118,25 @@ void  MyMemoryPool<T>::Delete(T* ptr)
 	m_mutex.unlock();
 }
 
+template <typename T>
+void MyMemoryPool<T>::clear()
+{
+	if (!m_curUseMem.empty())
+	{
+		for (auto i : m_curUseMem)
+		{
+			delete i;
+		}
+	}
+
+	if (!m_curHasMem.empty())
+	{
+		for (auto i : m_curHasMem)
+		{
+			delete i;
+		}
+	}
+}
 
 #endif // !_MY_MEMORY_POOL_
 
